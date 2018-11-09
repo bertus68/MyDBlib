@@ -42,7 +42,7 @@ public abstract class DB {
 		TIMESTAMP
 	}
 
-	
+		
 	private final String user;
 	private final String pswd;
 	private final String name;
@@ -114,6 +114,7 @@ public abstract class DB {
 	 * the connection
 	 */
 	protected Connection connection;
+	protected String url;
 
 	/**
 	 * @return true if connected
@@ -124,15 +125,25 @@ public abstract class DB {
 	}
 
 	/**
+	 * @param url the URL to be used for the connection
+	 * @throws SQLException
+	 * @throws AlreadyConnectedException
+	 */
+	public void connect(String url) throws SQLException, AlreadyConnectedException {
+		if(connection!=null) {
+			throw new AlreadyConnectedException();
+		}
+		this.url = url;
+		connection = DriverManager.getConnection(url, user, pswd);
+	}
+	
+	/**
 	 * connect
 	 * @throws SQLException
 	 * @throws AlreadyConnectedException
 	 */
 	public void connect() throws SQLException, AlreadyConnectedException {
-		if(connection!=null) {
-			throw new AlreadyConnectedException();
-		}
-		connection = DriverManager.getConnection(getURL(), user, pswd);
+		connect(url!=null?url:getURL());
 	}
 
 	/**

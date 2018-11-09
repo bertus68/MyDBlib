@@ -1,8 +1,11 @@
 package a.polverini.my;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -36,7 +39,11 @@ public class XML {
 		private String[] INDENT = new String[16];
 		
 		public Writer(String path) throws FileNotFoundException {
-			out = new PrintStream(new FileOutputStream(new File(path)));
+			this(new FileOutputStream(new File(path)));
+		}
+		
+		public Writer(OutputStream stream) throws FileNotFoundException {
+			out = new PrintStream(stream);
 			String s = "";
 			for(int i=0;i<INDENT.length;i++) {
 				INDENT[i] = s;
@@ -48,8 +55,7 @@ public class XML {
 			out.close();
 		}
 
-		private void writeDescription(String indent, String text) {
-			String tag  = "description";
+		public void writeTag(String indent, String tag, String text) {
 			out.printf("%s  <%s>\n",indent,tag);
 			for(String s : text.split("\n")) {
 				out.printf("%s  %s\n",indent,s);
@@ -57,16 +63,18 @@ public class XML {
 			out.printf("%s  </%s>\n",indent,tag);
 		}
 		
-		public void writeSpecification(Map<String, Item> egsccSpecification) {
+		public void writeTestSpecification(Item specification) {
+			
 			String indent = INDENT[0];
-			String tag = "specification";
+			String tag = "TestSpecification";
+			
 			out.printf("%s<%s>\n",indent,tag);
-			writeBaselines(		egsccSpecification.get("baselines"		));
-			writeDeployment(	egsccSpecification.get("deployments"	));
-			writeInformation(	egsccSpecification.get("informations"	));
-			writeMeasurement(	egsccSpecification.get("measurements"	));
-			writeRequirement(	egsccSpecification.get("requirements"	));
-			writeProject(		egsccSpecification.get("projects"		));
+			writeBaselines(		(Item)specification.get("baselines"		));
+			writeDeployment(	(Item)specification.get("deployments"	));
+			writeAdditionalInformations(	(Item)specification.get("informations"	));
+			writePerformanceMeasurements(	(Item)specification.get("measurements"	));
+			writeRequirement(	(Item)specification.get("requirements"	));
+			writeProject(		(Item)specification.get("projects"		));
 			out.printf("%s</%s>\n",INDENT[0],tag);
 		}
 		
@@ -74,7 +82,7 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tag  = "baseline";
+			String tag  = "Baseline";
 			String tags = tag + "s";
 			
 			// filter
@@ -92,19 +100,25 @@ public class XML {
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
 				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
-				writeBaselineItem(entry.getValue());
+				
+				Baseline baseline = (Baseline) entry.getValue();
+				
+				String description = (String)baseline.get(AdditionalInformation.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
+				writeBaselineItems(baseline);
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 			
 		}
 		
-		private void writeBaselineItem(Item parent) {
+		private void writeBaselineItems(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[2];
-			String tags = "baselineItems";
-			String tag  = "baselineItem";
+			String tag  = "BaselineItem";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -120,9 +134,19 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
-				writeBaselineItem(entry.getValue());
-				out.printf("%s  </%s>\n",indent,tag);
+
+				BaselineItem baselineItem = (BaselineItem)entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) baselineItem.get(BaselineItem.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+
+				String version = (String) baselineItem.get(BaselineItem.Field.VERSION);
+				if(version!=null) sb.append(String.format(" %s='%s'","version", version));
+				
+				out.printf("%s  <%s pk='%s'%s/>\n",indent,tag,entry.getKey(),sb.toString());
+				
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
@@ -131,8 +155,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tags = "deployments";
-			String tag  = "deployment";
+			String tag  = "Deployment";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -148,18 +172,34 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+
+				Deployment deployment = (Deployment)entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String name = (String) deployment.get(Deployment.Field.NAME);
+				if(name!=null) sb.append(String.format(" %s='%s'","name", name));
+
+				String measurementonly = (String) deployment.get(Deployment.Field.MEASUREMENT_ONLY);
+				if(measurementonly!=null) sb.append(String.format(" %s='%s'","measurementonly", measurementonly));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+				
+				String description = (String)deployment.get(Deployment.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
 				out.printf("%s  </%s>\n",indent,tag);
+				
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
 
-		private void writeInformation(Item parent) {
+		private void writeAdditionalInformations(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tag  = "information";
-			String tags = tag+"s";
+			String tag  = "AdditionalInformation";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -175,19 +215,25 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
+				
+				AdditionalInformation additionalInformation = (AdditionalInformation)entry.getValue();
+
 				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
-				writeDescription(indent+"  ", (String)entry.getValue().get(AdditionalInformation.Field.DESCRIPTION));
+
+				String description = (String)additionalInformation.get(AdditionalInformation.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
 		
-		private void writeMeasurement(Item parent) {
+		private void writePerformanceMeasurements(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tags = "measurements";
-			String tag  = "measurement";
+			String tag  = "PerformanceMeasurement";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -203,7 +249,25 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+				
+				PerformanceMeasurement performanceMeasurement = (PerformanceMeasurement)entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String key = (String) performanceMeasurement.get(PerformanceMeasurement.Field.KEY);
+				if(key!=null) sb.append(String.format(" %s='%s'","key", key));
+
+				String basevalue = (String) performanceMeasurement.get(PerformanceMeasurement.Field.BASEVALUE);
+				if(basevalue!=null) sb.append(String.format(" %s='%s'","basevalue", basevalue));
+
+				String targetvalue = (String) performanceMeasurement.get(PerformanceMeasurement.Field.TARGETVALUE);
+				if(targetvalue!=null) sb.append(String.format(" %s='%s'","targetvalue", targetvalue));
+
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+				
+				String description = (String)performanceMeasurement.get(PerformanceMeasurement.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
@@ -213,8 +277,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tags = "requirements";
-			String tag  = "requirement";
+			String tag  = "Requirement";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -230,27 +294,28 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
+				
 				Requirement requirement = (Requirement) entry.getValue();
 
-				StringBuilder			sb = new StringBuilder();
+				StringBuilder sb = new StringBuilder();
 				
-				String type	 		= (String) requirement.get(Requirement.Field.TYPE);
-				if(type!=null)			sb.append(String.format(" %s='%s'","type", type));
+				String id = (String) requirement.get(Requirement.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
 				
-				String id	 		= (String) requirement.get(Requirement.Field.ID);
-				if(id!=null)			sb.append(String.format(" %s='%s'","id", id));
+				String type = (String) requirement.get(Requirement.Field.TYPE);
+				if(type!=null) sb.append(String.format(" %s='%s'","type", type));
 				
-				String name	 		= (String) requirement.get(Requirement.Field.NAME);
-				if(name!=null)			sb.append(String.format(" %s='%s'","name", name));
+				String name = (String) requirement.get(Requirement.Field.NAME);
+				if(name!=null) sb.append(String.format(" %s='%s'","name", name));
 				
 				String verification = (String) requirement.get(Requirement.Field.VERIFICATION);
 				if(verification!=null)	sb.append(String.format(" %s='%s'","verification", verification));
 				
-				String priority		= (String) requirement.get(Requirement.Field.PRIORITY);
-				if(priority!=null)		sb.append(String.format(" %s='%s'","priority", priority));
+				String priority = (String) requirement.get(Requirement.Field.PRIORITY);
+				if(priority!=null) sb.append(String.format(" %s='%s'","priority", priority));
 				
-				String version		= (String) requirement.get(Requirement.Field.VERSION);
-				if(version!=null)		sb.append(String.format(" %s='%s'","version", version));
+				String version = (String) requirement.get(Requirement.Field.VERSION);
+				if(version!=null) sb.append(String.format(" %s='%s'","version", version));
 				
 				Timestamp timestamp = (Timestamp) requirement.get(Requirement.Field.IMPORT_DATE);
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0Z");
@@ -259,12 +324,12 @@ public class XML {
 				if(importdate!=null)	sb.append(String.format(" %s='%s'","importdate", name));
 				
 				String importfile = (String) requirement.get(Requirement.Field.IMPORT_FILE);
-				if(importfile!=null)	sb.append(String.format(" %s='%s'","importfile", importfile));
+				if(importfile!=null) sb.append(String.format(" %s='%s'","importfile", importfile));
 				
 				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(), sb.toString());
 
-				String description	= (String) requirement.get(Requirement.Field.DESCRIPTION);
-				writeDescription(indent+"  ", description);
+				String description = (String) requirement.get(Requirement.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
 				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
@@ -275,8 +340,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[1];
-			String tags = "projects";
-			String tag  = "project";
+			String tag  = "Project";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -292,11 +357,39 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
+				
+				Item item = entry.getValue();
+
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) item.get(Project.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String type = (String) item.get(Project.Field.TYPE);
+				if(type!=null) sb.append(String.format(" %s='%s'","type", type));
+				
+				String version = (String) item.get(Project.Field.VERSION);
+				if(version!=null) sb.append(String.format(" %s='%s'","version", version));
+				
+				String artifact = (String) item.get(Project.Field.ARTIFACT);
+				if(artifact!=null) sb.append(String.format(" %s='%s'","artifact", artifact));
+
+				String pkg = (String) item.get(Project.Field.PACKAGE);
+				if(pkg!=null) sb.append(String.format(" %s='%s'","package", pkg));
+				
+				String basefolder = (String) item.get(Project.Field.BASEFOLDER);
+				if(basefolder!=null) sb.append(String.format(" %s='%s'","basefolder", basefolder));
+				
+				String targetfolder = (String) item.get(Project.Field.TARGETFOLDER);
+				if(targetfolder!=null) sb.append(String.format(" %s='%s'","targetfolder", targetfolder));
+
+				
 				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
 				writeProjectRequirement(entry.getValue());
 				writeTestArea(entry.getValue());
 				writeScenario(entry.getValue());
 				out.printf("%s  </%s>\n",indent,tag);
+				
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
