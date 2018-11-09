@@ -16,27 +16,29 @@ public class Item {
 		return this.parent;
 	}
 	
-	private final String name;
+	private final String tag;
 	
-	public String getName() {
-		return name;
+	public String getTag() {
+		return tag;
 	}
 
 	public Item() {
 		this.parent = null;
-		this.name = null;
+		this.tag = null;
 	}
 
-	public Item(Item parent, String name) {
-		this.name = name;
+	public Item(Item parent, String tag) {
+		this.tag = tag;
 		this.parent = parent;
 		if(parent!=null) {
 			this.parent.add(this);
 		}
 	}
 
-	public final String toString() {
-		return name;
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return tag;
 	}
 
 	private Properties properties = new Properties();
@@ -58,5 +60,5 @@ public class Item {
 	public void add(Item child) {
 		children.add(child);
 	}
-
+	
 }

@@ -65,7 +65,7 @@ public class PGS extends DBS {
 		ScenarioDeployment.query(this);
 		ScenarioPerformanceMeasurement.query(this);
 		Procedure.query(this);
-		ProcedureTestcase.query(this);
+		ProcedureTestCase.query(this);
 		AutomatedProcedure.query(this);
 		ManualProcedure.query(this);
 		ManualProcedureStep.query(this);
@@ -103,7 +103,6 @@ public class PGS extends DBS {
 	public static class AdditionalInformation
 	extends DBS.AdditionalInformation 
 	{
-		
 		// TABLE
 		public static final String TABLE = "additional_information";
 
@@ -130,6 +129,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public AdditionalInformation(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -158,6 +162,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public AutomatedProcedure(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -190,6 +199,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public AuxiliaryRoutine(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -223,7 +237,12 @@ public class PGS extends DBS {
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
 		}
-	
+		
+		/** {@inheritDoc} */
+		public Baseline(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -260,6 +279,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public BaselineItem(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -267,7 +291,7 @@ public class PGS extends DBS {
 	 */
 	public static class Deployment 
 	extends DBS.Deployment 
-	{
+	{		
 		// TABLE
 		public static final String TABLE = "deployment";
 
@@ -294,6 +318,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+
+		/** {@inheritDoc} */
+		public Deployment(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -331,7 +360,12 @@ public class PGS extends DBS {
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
 		}
-	
+		
+		/** {@inheritDoc} */
+		public EditingLock(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -370,6 +404,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public Feature(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -398,6 +437,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public ManualProcedure(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -439,6 +483,11 @@ public class PGS extends DBS {
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
 		}
+		
+		/** {@inheritDoc} */
+		public ManualProcedureStep(Item parent) {
+			super(parent);
+		}
 
 	}
 
@@ -478,6 +527,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public PerformanceMeasurement(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -520,13 +574,18 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public Procedure(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
 	 * PROCEDURE_TESTCASE
 	 */
-	public static class ProcedureTestcase 
-	extends DBS.ProcedureTestcase 
+	public static class ProcedureTestCase 
+	extends DBS.ProcedureTestCase 
 	{
 		// TABLE
 		public static final String TABLE = "procedure_test_case";
@@ -550,6 +609,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public ProcedureTestCase(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -596,6 +660,11 @@ public class PGS extends DBS {
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
 		}
+		
+		/** {@inheritDoc} */
+		public Project(Item parent) {
+			super(parent);
+		}
 
 	}
 
@@ -638,6 +707,11 @@ public class PGS extends DBS {
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
 		}
+		
+		/** {@inheritDoc} */
+		public ProjectRequirement(Item parent) {
+			super(parent);
+		}
 
 	}
 
@@ -669,6 +743,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public ProjectRequirementDeployment(Item parent) {
+			super(parent);
 		}
 
 	}
@@ -717,6 +796,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public Requirement(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -749,6 +833,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public RequirementDeployment(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -793,6 +882,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public Scenario(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -825,6 +919,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public ScenarioAdditionalInformation(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -857,6 +956,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public ScenarioDeployment(Item parent) {
+			super(parent);
+		}
+		
 	}
 
 	/**
@@ -887,6 +991,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public ScenarioPerformanceMeasurement(Item parent) {
+			super(parent);
 		}
 	
 	}
@@ -925,6 +1034,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public SoftwareRequirement(Item parent) {
+			super(parent);
+		}
+		
 	}
 
 	/**
@@ -955,6 +1069,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public SoftwareRequirementUserRequirement(Item parent) {
+			super(parent);
 		}
 		
 	}
@@ -995,6 +1114,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public TestArea(Item parent) {
+			super(parent);
 		}
 		
 	}
@@ -1041,13 +1165,18 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public TestCase(Item parent) {
+			super(parent);
+		}
+		
 	}
 
 	/**
 	 * TESTCASE_PROJECT_REQUIREMENT
 	 */
 	public static class TestCaseProjectRequirement 
-	extends DBS.TestcaseProjectRequirement 
+	extends DBS.TestCaseProjectRequirement 
 	{
 		// TABLE
 		public static final String TABLE = "test_case_project_requirement";
@@ -1073,6 +1202,11 @@ public class PGS extends DBS {
 			query(pgs, TABLE, KEYS);
 		}
 		
+		/** {@inheritDoc} */
+		public TestCaseProjectRequirement(Item parent) {
+			super(parent);
+		}
+
 	}
 
 	/**
@@ -1111,6 +1245,11 @@ public class PGS extends DBS {
 		 */
 		public static void query(PGS pgs) throws NotConnectedException, SQLException {
 			query(pgs, TABLE, KEYS);
+		}
+		
+		/** {@inheritDoc} */
+		public UserRequirement(Item parent) {
+			super(parent);
 		}
 		
 	}

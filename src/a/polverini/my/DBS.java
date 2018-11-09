@@ -60,29 +60,29 @@ public abstract class DBS extends DB {
 	Item root = new Item();
 	
 	Item additionalInformationRoot = new Item(root, "information");
-	Map<Object, Item> additionalInformationPK = new HashMap<>();
+	Map<Object, AdditionalInformation> additionalInformationPK = new HashMap<>();
 	
 	Item baselineRoot = new Item(root, "baselines");
-	Map<Object, Item> baselinePK = new HashMap<>();
+	Map<Object, Baseline> baselinePK = new HashMap<>();
 	
 	Item deploymentRoot = new Item(root, "deployments");
-	Map<Object, Item> deploymentPK = new HashMap<>();
+	Map<Object, Deployment> deploymentPK = new HashMap<>();
 	
 	Item lockRoot = new Item(root, "locks");
-	Map<Object, Item> lockPK = new HashMap<>();
+	Map<Object, EditingLock> lockPK = new HashMap<>();
 	
 	Item requirementRoot = new Item(root, "requirements");
-	Map<Object, Item> requirementPK = new HashMap<>();
+	Map<Object, Requirement> requirementPK = new HashMap<>();
 	
 	Item projectRoot = new Item(root, "projects");
-	Map<Object, Item> projectPK 				= new HashMap<>();
-	Map<Object, Item> projectRequirementPK 		= new HashMap<>();
-	Map<Object, Item> performanceMeasurementPK	= new HashMap<>();
-	Map<Object, Item> testareaPK  				= new HashMap<>();
-	Map<Object, Item> featurePK   				= new HashMap<>();
-	Map<Object, Item> testcasePK  				= new HashMap<>();
-	Map<Object, Item> scenarioPK  				= new HashMap<>();
-	Map<Object, Item> procedurePK 				= new HashMap<>();
+	Map<Object, Project> projectPK = new HashMap<>();
+	Map<Object, ProjectRequirement> projectRequirementPK = new HashMap<>();
+	Map<Object, PerformanceMeasurement> performanceMeasurementPK = new HashMap<>();
+	Map<Object, TestArea> testareaPK = new HashMap<>();
+	Map<Object, Feature> featurePK = new HashMap<>();
+	Map<Object, TestCase> testcasePK = new HashMap<>();
+	Map<Object, Scenario> scenarioPK = new HashMap<>();
+	Map<Object, Procedure> procedurePK = new HashMap<>();
 
 	/**
 	 * constructor
@@ -97,9 +97,9 @@ public abstract class DBS extends DB {
 	/**
 	 * ADDITIONAL_INFORMATION
 	 */
-	public static class AdditionalInformation {
+	public static class AdditionalInformation extends Item {
 
-		private static final String TAG = "AdditionalInformation";
+		public static final String TAG = "AdditionalInformation";
 
 		/**
 		 * the fields in the ADDITIONAL_INFORMATION table
@@ -110,16 +110,18 @@ public abstract class DBS extends DB {
 			DESCRIPTION
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s",item.get(Field.KEY));
+		public AdditionalInformation(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.KEY) );
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -128,15 +130,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.additionalInformationRoot, TAG);
+				AdditionalInformation additionalInformation = new AdditionalInformation(dbs.additionalInformationRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						additionalInformation.set(key, val);
 					}
 				}
-				dbs.additionalInformationPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+AdditionalInformation.getUniqueID(item));
+				dbs.additionalInformationPK.put(additionalInformation.get(Field.PK), additionalInformation);
+				if(DEBUG) System.out.println(TAG+" "+additionalInformation);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -146,9 +148,9 @@ public abstract class DBS extends DB {
 	/**
 	 * AUTOMATED_PROCEDURE
 	 */
-	public static class AutomatedProcedure {
+	public static class AutomatedProcedure extends Item {
 
-		private static final String TAG = "AutomatedProcedure";
+		public static final String TAG = "AutomatedProcedure";
 
 		/**
 		 * the fields in the AUTOMATED_PROCEDURE table
@@ -157,16 +159,12 @@ public abstract class DBS extends DB {
 			PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", Procedure.getUniqueID(item));
+		public AutomatedProcedure(Item parent) {
+			super(parent, TAG);
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -180,11 +178,11 @@ public abstract class DBS extends DB {
 
 				Item procedure = dbs.procedurePK.get(procedure_pk);
 				if(procedure==null) {
-					System.err.println(Procedure.TAG+" (pk="+procedure_pk+")");
+					System.err.println(TAG+" invalid "+Procedure.TAG+" (pk="+procedure_pk+")");
 					continue;
 				}
 				
-				if(DEBUG) System.out.println(TAG+" "+AutomatedProcedure.getUniqueID(procedure));
+				if(DEBUG) System.out.println(TAG+" "+procedure);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -194,9 +192,9 @@ public abstract class DBS extends DB {
 	/**
 	 * AUXILIARY_ROUTINE
 	 */
-	public static class AuxiliaryRoutine {
+	public static class AuxiliaryRoutine extends Item {
 
-		private static final String TAG = "AuxiliaryRoutine";
+		public static final String TAG = "AuxiliaryRoutine";
 
 		/**
 		 * the fields in the AUXILIARY_ROUTINE table
@@ -205,16 +203,12 @@ public abstract class DBS extends DB {
 			PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", Procedure.getUniqueID(item));
+		public AuxiliaryRoutine(Item parent) {
+			super(parent, TAG);
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -228,11 +222,11 @@ public abstract class DBS extends DB {
 
 				Item procedure = dbs.procedurePK.get(procedure_pk);
 				if(procedure==null) {
-					System.err.println(Procedure.TAG+" (pk="+procedure_pk+")");
+					System.err.println(TAG+" invalid "+Procedure.TAG+" (pk="+procedure_pk+")");
 					continue;
 				}
 				
-				if(DEBUG) System.out.println(TAG+" "+AuxiliaryRoutine.getUniqueID(procedure));
+				if(DEBUG) System.out.println(TAG+" "+procedure);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -242,9 +236,9 @@ public abstract class DBS extends DB {
 	/**
 	 * BASELINE
 	 */
-	public static class Baseline {
+	public static class Baseline extends Item {
 
-		private static final String TAG = "Baseline";
+		public static final String TAG = "Baseline";
 
 		/**
 		 * the fields in the BASELINE table
@@ -255,16 +249,18 @@ public abstract class DBS extends DB {
 			DESCRIPTION
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.NAME));
+		public Baseline(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.NAME));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -273,15 +269,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.baselineRoot, TAG);
+				Baseline baseline = new Baseline(dbs.baselineRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						baseline.set(key, val);
 					}
 				}
-				dbs.baselinePK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Baseline.getUniqueID(item));
+				dbs.baselinePK.put(baseline.get(Field.PK), baseline);
+				if(DEBUG) System.out.println(TAG+" "+baseline);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -290,9 +286,9 @@ public abstract class DBS extends DB {
 	/**
 	 * BASELINE_ITEM
 	 */
-	public static class BaselineItem {
+	public static class BaselineItem extends Item {
 
-		private static final String TAG = "BaselineItem";
+		public static final String TAG = "BaselineItem";
 
 		/**
 		 * the fields in the BASELINE_ITEM table
@@ -304,16 +300,18 @@ public abstract class DBS extends DB {
 			BASELINE_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s",Baseline.getUniqueID(item.getParent()), item.get(Field.ID));
+		public BaselineItem(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s-%s", getParent(), get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -324,20 +322,20 @@ public abstract class DBS extends DB {
 			for(Properties result : results) {
 
 				Object baseline_pk = result.get(Field.BASELINE_PK);
-				Item baseline = dbs.baselinePK.get(baseline_pk);
+				Baseline baseline = (Baseline)dbs.baselinePK.get(baseline_pk);
 				if(baseline==null) {
 					System.err.println(Baseline.TAG+" (pk="+baseline_pk+")");
 					continue;
 				}
 
-				Item item = new Item(baseline, TAG);
+				BaselineItem baselineItem = new BaselineItem(baseline);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						baselineItem.set(key, val);
 					}
 				}
-				if(DEBUG) System.out.println(TAG+" "+BaselineItem.getUniqueID(item));
+				if(DEBUG) System.out.println(TAG+" "+baselineItem);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -347,9 +345,9 @@ public abstract class DBS extends DB {
 	/**
 	 * DEPLOYMENT
 	 */
-	public static class Deployment {
+	public static class Deployment extends Item {
 
-		private static final String TAG = "Deployment";
+		public static final String TAG = "Deployment";
 
 		/**
 		 * the fields in the DEPLOYMENT table
@@ -361,16 +359,18 @@ public abstract class DBS extends DB {
 			MEASUREMENT_ONLY
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.NAME));
+		public Deployment(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.NAME));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -379,15 +379,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.deploymentRoot, TAG);
+				Deployment deployment = new Deployment(dbs.deploymentRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						deployment.set(key, val);
 					}
 				}
-				dbs.deploymentPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Deployment.getUniqueID(item));
+				dbs.deploymentPK.put(deployment.get(Field.PK), deployment);
+				if(DEBUG) System.out.println(TAG+" "+deployment);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -397,9 +397,9 @@ public abstract class DBS extends DB {
 	/**
 	 * EDITING_LOCK
 	 */
-	public static class EditingLock {
+	public static class EditingLock extends Item {
 
-		private static final String TAG = "EditingLock";
+		public static final String TAG = "EditingLock";
 
 		/**
 		 * the fields in the EDITING_LOCK table
@@ -411,16 +411,18 @@ public abstract class DBS extends DB {
 			TYPE
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.ID));
+		public EditingLock(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -429,15 +431,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.lockRoot, TAG);
+				EditingLock lock = new EditingLock(dbs.lockRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						lock.set(key, val);
 					}
 				}
-				dbs.lockPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+EditingLock.getUniqueID(item));
+				dbs.lockPK.put(lock.get(Field.PK), lock);
+				if(DEBUG) System.out.println(TAG+" "+lock);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -447,9 +449,9 @@ public abstract class DBS extends DB {
 	/**
 	 * FEATURE
 	 */
-	public static class Feature {
+	public static class Feature extends Item {
 
-		private static final String TAG = "Feature";
+		public static final String TAG = "Feature";
 
 		/**
 		 * the fields in the FEATURE table
@@ -462,16 +464,18 @@ public abstract class DBS extends DB {
 			TESTAREA_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", TestArea.getUniqueID(item.getParent()), item.get(Field.ID));
+		public Feature(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s-%s", getParent(), get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -488,15 +492,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 				
-				Item item = new Item(testarea, TAG);
+				Feature feature = new Feature(testarea);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						feature.set(key, val);
 					}
 				}
-				dbs.featurePK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Feature.getUniqueID(item));
+				dbs.featurePK.put(feature.get(Field.PK), feature);
+				if(DEBUG) System.out.println(TAG+" "+feature);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -506,9 +510,9 @@ public abstract class DBS extends DB {
 	/**
 	 * MANUAL_PROCEDURE
 	 */
-	public static class ManualProcedure {
+	public static class ManualProcedure extends Item {
 
-		private static final String TAG = "ManualProcedure";
+		public static final String TAG = "ManualProcedure";
 
 		/**
 		 * the fields in the MANUAL_PROCEDURE table
@@ -517,16 +521,12 @@ public abstract class DBS extends DB {
 			PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", Procedure.getUniqueID(item));
+		public ManualProcedure(Item parent) {
+			super(parent, TAG);
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -544,7 +544,7 @@ public abstract class DBS extends DB {
 					continue;
 				}
 				
-				if(DEBUG) System.out.println(TAG+" "+ManualProcedure.getUniqueID(procedure));
+				if(DEBUG) System.out.println(TAG+" "+procedure);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -554,9 +554,9 @@ public abstract class DBS extends DB {
 	/**
 	 * MANUAL_PROCEDURE_STEP
 	 */
-	public static class ManualProcedureStep {
+	public static class ManualProcedureStep extends Item {
 
-		private static final String TAG = "ManualProcedureStep";
+		public static final String TAG = "ManualProcedureStep";
 
 		/**
 		 * the fields in the MANUAL_PROCEDURE_STEP table
@@ -570,16 +570,18 @@ public abstract class DBS extends DB {
 			MANUAL_PROCEDURE_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%d", Procedure.getUniqueID(item.getParent()), item.get(Field.STEP_NUMBER));
+		public ManualProcedureStep(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s-%d", getParent(), get(Field.STEP_NUMBER));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -597,15 +599,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(procedure, TAG);
+				ManualProcedureStep step = new ManualProcedureStep(procedure);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						step.set(key, val);
 					}
 				}
 
-				if(DEBUG) System.out.println(TAG+" "+ManualProcedureStep.getUniqueID(item));
+				if(DEBUG) System.out.println(TAG+" "+step);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -615,9 +617,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PERFORMANCE_MEASUREMENT
 	 */
-	public static class PerformanceMeasurement {
+	public static class PerformanceMeasurement extends Item {
 
-		private static final String TAG = "PerformanceMeasurement";
+		public static final String TAG = "PerformanceMeasurement";
 
 		/**
 		 * the fields in the PERFORMANCE_MEASUREMENT table
@@ -631,16 +633,18 @@ public abstract class DBS extends DB {
 			PROJECT_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Project.getUniqueID(item.getParent()), item.get(Field.KEY));
+		public PerformanceMeasurement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s-%s", getParent(), get(Field.KEY));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -658,15 +662,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(project, TAG);
+				PerformanceMeasurement performanceMeasurement = new PerformanceMeasurement(project);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						performanceMeasurement.set(key, val);
 					}
 				}
-				dbs.performanceMeasurementPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+PerformanceMeasurement.getUniqueID(item));
+				dbs.performanceMeasurementPK.put(performanceMeasurement.get(Field.PK), performanceMeasurement);
+				if(DEBUG) System.out.println(TAG+" "+performanceMeasurement);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -676,9 +680,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PROCEDURE
 	 */
-	public static class Procedure {
+	public static class Procedure extends Item {
 
-		private static final String TAG = "Procedure";
+		public static final String TAG = "Procedure";
 
 		/**
 		 * the fields in the PROCEDURE table
@@ -692,16 +696,18 @@ public abstract class DBS extends DB {
 			SCENARIO_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Scenario.getUniqueID(item.getParent()), item.get(Field.ID));
+		public Procedure(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s-%s", getParent(), get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -718,15 +724,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 				
-				Item item = new Item(scenario, TAG);
+				Procedure procedure = new Procedure(scenario);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						procedure.set(key, val);
 					}
 				}
-				dbs.procedurePK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Procedure.getUniqueID(item));
+				dbs.procedurePK.put(procedure.get(Field.PK), procedure);
+				if(DEBUG) System.out.println(TAG+" "+procedure);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -736,9 +742,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PROCEDURE_TESTCASE
 	 */
-	public static class ProcedureTestcase {
+	public static class ProcedureTestCase extends Item {
 
-		private static final String TAG = "ProcedureTestcase";
+		private static final String TAG = "ProcedureTestCase";
 
 		/**
 		 * the fields in the PROCEDURE_TESTCASE table
@@ -748,16 +754,18 @@ public abstract class DBS extends DB {
 			TESTCASES_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", Procedure.getUniqueID(item.getParent()), TestCase.getUniqueID((Item)item.get(TestCase.TAG)));
+		public ProcedureTestCase(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(TestCase.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -770,21 +778,21 @@ public abstract class DBS extends DB {
 				Object procedure_pk = result.get(Field.PROCEDURE_PK);
 				Item procedure = dbs.procedurePK.get(procedure_pk);
 				if(procedure==null) {
-					System.err.println(ProcedureTestcase.TAG+" invalid procedure (pk="+procedure_pk+")");
+					System.err.println(ProcedureTestCase.TAG+" invalid procedure (pk="+procedure_pk+")");
 					continue;
 				}
 
 				Object testcases_pk = result.get(Field.TESTCASES_PK);
 				Item testcase = dbs.testcasePK.get(testcases_pk);
 				if(testcase==null) {
-					System.err.println(ProcedureTestcase.TAG+" invalid testcase (pk="+testcases_pk+")");
+					System.err.println(ProcedureTestCase.TAG+" invalid testcase (pk="+testcases_pk+")");
 					continue;
 				}
 
-				Item reference = new Item(procedure, "reference");
+				ProcedureTestCase reference = new ProcedureTestCase(procedure);
 				reference.set(TestCase.TAG, testcase);
 
-				if(DEBUG) System.out.println(TAG+" "+ProcedureTestcase.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -794,9 +802,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PROJECT
 	 */
-	public static class Project {
+	public static class Project extends Item {
 
-		private static final String TAG = "Project";
+		public static final String TAG = "Project";
 
 		/**
 		 * the fields in the PROJECT table
@@ -813,16 +821,18 @@ public abstract class DBS extends DB {
 			PARENT_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.ID));
+		public Project(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -831,15 +841,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.projectRoot, TAG);
+				Project project = new Project(dbs.projectRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						project.set(key, val);
 					}
 				}
-				dbs.projectPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Project.getUniqueID(item));
+				dbs.projectPK.put(project.get(Field.PK), project);
+				if(DEBUG) System.out.println(TAG+" "+project);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -849,9 +859,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PROJECT_REQUIREMENT
 	 */
-	public static class ProjectRequirement {
+	public static class ProjectRequirement extends Item {
 
-		private static final String TAG = "ProjectRequirement";
+		public static final String TAG = "ProjectRequirement";
 
 		/**
 		 * the fields in the PROJECT_REQUIREMENT table
@@ -866,16 +876,18 @@ public abstract class DBS extends DB {
 			PROJECT_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Project.getUniqueID(item.getParent()), item.get(Field.REQUIREMENT_ID));
+		public ProjectRequirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s:%s", getParent(), get(Field.REQUIREMENT_ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -892,28 +904,28 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(project, TAG);
+				ProjectRequirement projectRequirement = new ProjectRequirement(project);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						projectRequirement.set(key, val);
 					}
 				}
-				dbs.projectRequirementPK.put(item.get(Field.PK), item);
+				dbs.projectRequirementPK.put(projectRequirement.get(Field.PK), projectRequirement);
 
 				Object requirement_id = result.get(Field.REQUIREMENT_ID);
-				Item requirement = dbs.requirementPK.get(requirement_id);
+				Requirement requirement = dbs.requirementPK.get(requirement_id);
 				if(requirement==null) {
 					System.err.println(Requirement.TAG+" (pk="+requirement_id+")");
 					continue;
 				}
 
-				Item reference = new Item(item, "reference");
+				ProjectRequirement reference = new ProjectRequirement(projectRequirement);
 				reference.set(Requirement.TAG, requirement);
 
-				if(DEBUG) System.out.printf("%s: %s\n", TAG, ProjectRequirement.getUniqueID(item));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
-			if(DEBUG) System.out.printf("%d %s\n", dbs.count(table), TAG);
+			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
 
 	}
@@ -921,9 +933,9 @@ public abstract class DBS extends DB {
 	/**
 	 * PROJECT_REQUIREMENT_DEPLOYMENT
 	 */
-	public static class ProjectRequirementDeployment {
+	public static class ProjectRequirementDeployment extends Item {
 
-		private static final String TAG = "ProjectRequirementDeployment";
+		public static final String TAG = "ProjectRequirementDeployment";
 
 		/**
 		 * the fields in the PROJECT_REQUIREMENT_DEPLOYMENT table
@@ -933,16 +945,18 @@ public abstract class DBS extends DB {
 			DEPLOYMENTS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", ProjectRequirement.getUniqueID(item.getParent()), Deployment.getUniqueID((Item)item.get(Deployment.TAG)));
+		public ProjectRequirementDeployment(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(Deployment.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -966,10 +980,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item reference = new Item(requirement, "reference");
+				ProjectRequirementDeployment reference = new ProjectRequirementDeployment(requirement);
 				reference.set(Deployment.TAG, deployment);
 
-				if(DEBUG) System.out.println(TAG+" "+ProjectRequirementDeployment.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -979,9 +993,9 @@ public abstract class DBS extends DB {
 	/**
 	 * REQUIREMENT
 	 */
-	public static class Requirement {
+	public static class Requirement extends Item {
 
-		private static final String TAG = "Requirement";
+		public static final String TAG = "Requirement";
 
 		/**
 		 * the fields in the REQUIREMENT table
@@ -998,16 +1012,18 @@ public abstract class DBS extends DB {
 			VERSION
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.ID));
+		public Requirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1016,15 +1032,15 @@ public abstract class DBS extends DB {
 		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
-				Item item = new Item(dbs.requirementRoot, TAG);
+				Requirement requirement = new Requirement(dbs.requirementRoot);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						requirement.set(key, val);
 					}
 				}
-				dbs.requirementPK.put(item.get(Field.ID), item);
-				if(DEBUG) System.out.println(TAG+" "+Requirement.getUniqueID(item));
+				dbs.requirementPK.put(requirement.get(Field.ID), requirement);
+				if(DEBUG) System.out.println(TAG+" "+requirement);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1034,9 +1050,9 @@ public abstract class DBS extends DB {
 	/**
 	 * REQUIREMENT_DEPLOYMENT
 	 */
-	public static class RequirementDeployment {
+	public static class RequirementDeployment extends Item {
 
-		private static final String TAG = "RequirementDeployment";
+		public static final String TAG = "RequirementDeployment";
 
 		/**
 		 * the fields in the REQUIREMENT_DEPLOYMENT table
@@ -1046,16 +1062,18 @@ public abstract class DBS extends DB {
 			DEPLOYMENTS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", Requirement.getUniqueID(item.getParent()), Deployment.getUniqueID((Item)item.get(Deployment.TAG)));
+		public RequirementDeployment(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(Deployment.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1079,10 +1097,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item reference = new Item(requirement, "reference");
+				RequirementDeployment reference = new RequirementDeployment(requirement);
 				reference.set(Deployment.TAG, deployment);
 
-				if(DEBUG) System.out.println(TAG+" "+RequirementDeployment.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1092,9 +1110,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SCENARIO
 	 */
-	public static class Scenario {
+	public static class Scenario extends Item {
 
-		private static final String TAG = "Scenario";
+		public static final String TAG = "Scenario";
 
 		/**
 		 * the fields in the SCENARIO table
@@ -1110,16 +1128,18 @@ public abstract class DBS extends DB {
 			PROJECT_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Project.getUniqueID(item.getParent()), item.get(Field.ID));
+		public Scenario(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s:%s", getParent(), get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1137,26 +1157,24 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(project, TAG);
+				Scenario scenario = new Scenario(project);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						scenario.set(key, val);
 					}
 				}
-				dbs.scenarioPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Scenario.getUniqueID(item));
+				dbs.scenarioPK.put(scenario.get(Field.PK), scenario);
+				if(DEBUG) System.out.println(TAG+" "+scenario);
 				
 				Object testarea_pk = result.get(Field.TESTAREA_PK);
-
 				Item testarea = dbs.testareaPK.get(testarea_pk);
 				if(testarea==null) {
 					System.err.println(TestArea.TAG+" (pk="+testarea_pk+")");
 					continue;
 				}
 
-				Item reference = new Item(item, "reference");
-				reference.set(TestArea.TAG, testarea);
+				scenario.set(TestArea.TAG, testarea);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1166,9 +1184,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SCENARIO_ADDITIONAL_INFORMATION
 	 */
-	public static class ScenarioAdditionalInformation {
+	public static class ScenarioAdditionalInformation extends Item {
 
-		private static final String TAG = "ScenarioAdditionalInformation";
+		public static final String TAG = "ScenarioAdditionalInformation";
 
 		/**
 		 * the fields in the SCENARIO_ADDITIONAL_INFORMATION table
@@ -1178,16 +1196,18 @@ public abstract class DBS extends DB {
 			INFORMATIONS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", Scenario.getUniqueID(item.getParent()), AdditionalInformation.getUniqueID((Item)item.get(AdditionalInformation.TAG)));
+		public ScenarioAdditionalInformation(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(AdditionalInformation.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1211,10 +1231,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item reference = new Item(scenario, "reference");
+				ScenarioAdditionalInformation reference = new ScenarioAdditionalInformation(scenario);
 				reference.set(AdditionalInformation.TAG, information);
 
-				if(DEBUG) System.out.println(TAG+" "+ScenarioAdditionalInformation.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1224,9 +1244,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SCENARIO_DEPLOYMENT
 	 */
-	public static class ScenarioDeployment {
+	public static class ScenarioDeployment extends Item {
 
-		private static final String TAG = "ScenarioDeployment";
+		public static final String TAG = "ScenarioDeployment";
 
 		/**
 		 * the fields in the SCENARIO_DEPLOYMENT table
@@ -1236,16 +1256,18 @@ public abstract class DBS extends DB {
 			DEPLOYMENTS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", Scenario.getUniqueID(item.getParent()), Deployment.getUniqueID((Item)item.get(Deployment.TAG)));
+		public ScenarioDeployment(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(Deployment.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1269,10 +1291,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item reference = new Item(scenario, "reference");
+				ScenarioDeployment reference = new ScenarioDeployment(scenario);
 				reference.set(Deployment.TAG, deployment);
 
-				if(DEBUG) System.out.println(TAG+" "+ScenarioDeployment.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1282,9 +1304,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SCENARIO_PERFORMANCE_MEASUREMENT
 	 */
-	public static class ScenarioPerformanceMeasurement {
+	public static class ScenarioPerformanceMeasurement extends Item {
 
-		private static final String TAG = "ScenarioPerformanceMeasurement";
+		public static final String TAG = "ScenarioPerformanceMeasurement";
 
 		/**
 		 * the fields in the SCENARIO_PERFORMANCE_MEASUREMENT table
@@ -1294,16 +1316,18 @@ public abstract class DBS extends DB {
 			MEASUREMENTS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", Scenario.getUniqueID(item.getParent()), PerformanceMeasurement.getUniqueID((Item)item.get(PerformanceMeasurement.TAG)));
+		public ScenarioPerformanceMeasurement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(PerformanceMeasurement.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1327,10 +1351,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item reference = new Item(scenario, "reference");
+				ScenarioPerformanceMeasurement reference = new ScenarioPerformanceMeasurement(scenario);
 				reference.set(PerformanceMeasurement.TAG, measurement);
 
-				if(DEBUG) System.out.println(TAG+" "+ScenarioPerformanceMeasurement.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1340,9 +1364,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SOFTWARE_REQUIREMENT
 	 */
-	public static class SoftwareRequirement {
+	public static class SoftwareRequirement extends Item {
 
-		private static final String TAG = "SoftwareRequirement";
+		public static final String TAG = "SoftwareRequirement";
 
 		/**
 		 * the fields in the SOFTWARE_REQUIREMENT table
@@ -1354,16 +1378,18 @@ public abstract class DBS extends DB {
 			STRUCTURE
 		}
 		
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.ID));
+		public SoftwareRequirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1380,15 +1406,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 				
-				Item item = new Item(requirement, TAG);
+				SoftwareRequirement softwareRequirement = new SoftwareRequirement(requirement);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						softwareRequirement.set(key, val);
 					}
 				}
 
-				if(DEBUG) System.out.println(TAG+" "+SoftwareRequirement.getUniqueID(item));
+				if(DEBUG) System.out.println(TAG+" "+softwareRequirement);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1398,9 +1424,9 @@ public abstract class DBS extends DB {
 	/**
 	 * SOFTWARE_REQUIREMENT_USER_REQUIREMENT
 	 */
-	public static class SoftwareRequirementUserRequirement {
+	public static class SoftwareRequirementUserRequirement extends Item {
 
-		private static final String TAG = "SoftwareRequirementUserRequirement";
+		public static final String TAG = "SoftwareRequirementUserRequirement";
 
 		/**
 		 * the fields in the SOFTWARE_REQUIREMENT_USER_REQUIREMENT table
@@ -1410,16 +1436,18 @@ public abstract class DBS extends DB {
 			USER_REQ_ID
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", SoftwareRequirement.getUniqueID(item.getParent()), UserRequirement.getUniqueID((Item)item.get(UserRequirement.TAG)));
+		public SoftwareRequirementUserRequirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(UserRequirement.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1445,7 +1473,7 @@ public abstract class DBS extends DB {
 				
 				Item sr = null;
 				for(Item child : requirement.getChildren()) {
-					if(child.getName().equals(SoftwareRequirement.TAG)) {
+					if(child.getTag().equals(SoftwareRequirement.TAG)) {
 						sr = child;
 					}
 				}
@@ -1455,10 +1483,10 @@ public abstract class DBS extends DB {
 					continue;
 				}
 	
-				Item reference = new Item(sr, "reference");
+				SoftwareRequirementUserRequirement reference = new SoftwareRequirementUserRequirement(sr);
 				reference.set(UserRequirement.TAG, ur);
 
-				if(DEBUG) System.out.println(TAG+" "+SoftwareRequirementUserRequirement.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1468,9 +1496,9 @@ public abstract class DBS extends DB {
 	/**
 	 * TESTAREA
 	 */
-	public static class TestArea {
+	public static class TestArea extends Item {
 
-		private static final String TAG = "TestArea";
+		public static final String TAG = "TestArea";
 
 		/**
 		 * the fields in the TESTAREA table
@@ -1484,16 +1512,18 @@ public abstract class DBS extends DB {
 			PROJECT_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Project.getUniqueID(item.getParent()), item.get(Field.ID));
+		public TestArea(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s:%s", getParent(), get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1511,15 +1541,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(project, TAG);
+				TestArea testArea = new TestArea(project);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						testArea.set(key, val);
 					}
 				}
-				dbs.testareaPK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+TestArea.getUniqueID(item));
+				dbs.testareaPK.put(testArea.get(Field.PK), testArea);
+				if(DEBUG) System.out.println(TAG+" "+testArea);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1529,9 +1559,9 @@ public abstract class DBS extends DB {
 	/**
 	 * TESTCASE
 	 */
-	public static class TestCase {
+	public static class TestCase extends Item {
 
-		private static final String TAG = "TestCase";
+		public static final String TAG = "TestCase";
 
 		/**
 		 * the fields in the TESTCASE table
@@ -1547,16 +1577,19 @@ public abstract class DBS extends DB {
 			FEATURE_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s-%s", Feature.getUniqueID(item.getParent()), item.get(Field.ID));
+		public TestCase(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			String id = (String)get(Field.ID);
+			return String.format("%s-%s", getParent(), id.substring(id.lastIndexOf('-')+1));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1573,15 +1606,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				Item item = new Item(feature, TAG);
+				TestCase testcase = new TestCase(feature);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						testcase.set(key, val);
 					}
 				}
-				dbs.testcasePK.put(item.get(Field.PK), item);
-				if(DEBUG) System.out.println(TAG+" "+Feature.getUniqueID(item));
+				dbs.testcasePK.put(testcase.get(Field.PK), testcase);
+				if(DEBUG) System.out.println(TAG+" "+testcase);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1591,9 +1624,9 @@ public abstract class DBS extends DB {
 	/**
 	 * TESTCASE_PROJECT_REQUIREMENT
 	 */
-	public static class TestcaseProjectRequirement {
+	public static class TestCaseProjectRequirement extends Item {
 
-		private static final String TAG = "TestcaseProjectRequirement";
+		public static final String TAG = "TestCaseProjectRequirement";
 
 		/**
 		 * the fields in the TESTCASE_PROJECT_REQUIREMENT table
@@ -1603,16 +1636,18 @@ public abstract class DBS extends DB {
 			REQUIREMENTS_PK
 		}
 
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s=%s", TestCase.getUniqueID(item.getParent()), ProjectRequirement.getUniqueID((Item)item.get(ProjectRequirement.TAG)));
+		public TestCaseProjectRequirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s=%s", getParent(), get(ProjectRequirement.TAG));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1626,22 +1661,22 @@ public abstract class DBS extends DB {
 
 				Item testcase = dbs.testcasePK.get(testcase_pk);
 				if(testcase==null) {
-					System.err.println(TestcaseProjectRequirement.TAG+" invalid testcase (pk="+testcase_pk+")");
+					System.err.println(TestCaseProjectRequirement.TAG+" invalid testcase (pk="+testcase_pk+")");
 					continue;
 				}
 
-				Object requirements_pk = result.get(Field.REQUIREMENTS_PK);
+				Object projectRequirements_pk = result.get(Field.REQUIREMENTS_PK);
 
-				Item requirement = dbs.projectRequirementPK.get(requirements_pk);
-				if(requirement==null) {
-					System.err.println(TestcaseProjectRequirement.TAG+" invalid project-requirement (pk="+requirements_pk+")");
+				ProjectRequirement projectRequirement = dbs.projectRequirementPK.get(projectRequirements_pk);
+				if(projectRequirement==null) {
+					System.err.println(TestCaseProjectRequirement.TAG+" invalid "+ProjectRequirement.TAG+" (pk="+projectRequirements_pk+")");
 					continue;
 				}
+	
+				TestCaseProjectRequirement reference = new TestCaseProjectRequirement(testcase);
+				reference.set(ProjectRequirement.TAG, projectRequirement);
 
-				Item reference = new Item(testcase, "reference");
-				reference.set(ProjectRequirement.TAG, requirement);
-
-				if(DEBUG) System.out.println(TAG+" "+TestcaseProjectRequirement.getUniqueID(reference));
+				if(DEBUG) System.out.println(TAG+" "+reference);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
@@ -1650,9 +1685,9 @@ public abstract class DBS extends DB {
 	/**
 	 * USER_REQUIREMENT
 	 */
-	public static class UserRequirement {
+	public static class UserRequirement extends Item {
 
-		private static final String TAG = "UserRequirement";
+		public static final String TAG = "UserRequirement";
 
 		/**
 		 * the fields in the USER_REQUIREMENT table
@@ -1666,16 +1701,18 @@ public abstract class DBS extends DB {
 			TYPE
 		}
 		
-		/**
-		 * @param item
-		 * @return the corresponding unique id
-		 */
-		public static String getUniqueID(Item item) {
-			return String.format("%s", item.get(Field.ID));
+		public UserRequirement(Item parent) {
+			super(parent, TAG);
+		}
+
+		/** {@inheritDoc} */
+		@Override
+		public String toString() {
+			return String.format("%s", get(Field.ID));
 		}
 
 		/**
-		 * @param dbs the DataBase Specification 
+		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
 		 * @throws NotConnectedException
@@ -1692,15 +1729,15 @@ public abstract class DBS extends DB {
 					continue;
 				}
 				
-				Item item = new Item(requirement, TAG);
+				UserRequirement userRequirement = new UserRequirement(requirement);
 				for(Object key : keys.keySet()) {
 					Object val = result.get(key);
 					if(val!=null) {
-						item.set(key, val);
+						userRequirement.set(key, val);
 					}
 				}
 
-				if(DEBUG) System.out.println(TAG+" "+UserRequirement.getUniqueID(item));
+				if(DEBUG) System.out.println(TAG+" "+userRequirement);
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}

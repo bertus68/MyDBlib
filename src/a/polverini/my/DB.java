@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.h2.jdbc.JdbcClob;
+
 import a.polverini.my.exceptions.AlreadyConnectedException;
 import a.polverini.my.exceptions.InvalidKeyException;
 import a.polverini.my.exceptions.NotConnectedException;
@@ -234,7 +236,12 @@ public abstract class DB {
 				for(int i=0; i<k.length; i++) {
 					Object val = rs.getObject(i+1);
 					if(val!=null) {
-						properties.put(k[i], val);
+						if (val instanceof JdbcClob) {
+							JdbcClob clob = (JdbcClob)val;
+							properties.put(k[i], clob.getSubString(1, (int) clob.length()));
+						} else {
+							properties.put(k[i], val);
+						}
 					}
 				}
 				list.add(properties);
@@ -393,7 +400,7 @@ public abstract class DB {
 						if(val instanceof Long) {
 							statement.setLong(i+1, (Long)val);
 						} else if(val instanceof String) {
-								statement.setLong(i+1, Long.parseLong((String)val));
+							statement.setLong(i+1, Long.parseLong((String)val));
 						} else {
 							statement.setObject(i+1, val);
 						}

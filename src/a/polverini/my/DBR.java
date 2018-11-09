@@ -69,7 +69,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class AdditionalInformationExecution {
 
-		private static final String TAG = "AdditionalInformationExecution";
+		public static final String TAG = "AdditionalInformationExecution";
 		
 		/**
 		 * the fields in the ADDITIONAL_INFORMATION_EXECUTION table
@@ -118,7 +118,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class AutomatedProcedureExecution {
 
-		private static final String TAG = "AutomatedProcedureExecution";
+		public static final String TAG = "AutomatedProcedureExecution";
 		
 		/**
 		 * the fields in the AUTOMATED_PROCEDURE_EXECUTION table
@@ -166,7 +166,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ManualProcedureExecution {
 
-		private static final String TAG = "ManualProcedureExecution";
+		public static final String TAG = "ManualProcedureExecution";
 
 		/**
 		 * the fields in the MANUAL_PROCEDURE_EXECUTION table
@@ -214,7 +214,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ManualProcedureStepExecution {
 
-		private static final String TAG = "ManualProcedureStepExecution";
+		public static final String TAG = "ManualProcedureStepExecution";
 
 		/**
 		 * the fields in the MANUAL_PROCEDURE_STEP_EXECUTION table
@@ -276,7 +276,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class PerformanceMeasurementExecution {
 
-		private static final String TAG = "PerformanceMeasurementExecution";
+		public static final String TAG = "PerformanceMeasurementExecution";
 
 		/**
 		 * the fields in the PERFORMANCE_MEASUREMENT_EXECUTION table
@@ -325,7 +325,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ProcedureExecution {
 
-		private static final String TAG = "ProcedureExecution";
+		public static final String TAG = "ProcedureExecution";
 
 		/**
 		 * the fields in the PROCEDURE_EXECUTION table
@@ -390,7 +390,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ScenarioExecution {
 
-		private static final String TAG = "ScenarioExecution";
+		public static final String TAG = "ScenarioExecution";
 
 		/**
 		 * the fields in the PROCEDURE_EXECUTION table
@@ -447,7 +447,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ScenarioAdditionalInformationExecution {
 
-		private static final String TAG = "ScenarioAdditionalInformationExecution";
+		public static final String TAG = "ScenarioAdditionalInformationExecution";
 
 		/**
 		 * the fields in the SCENARIO_ADDITIONAL_INFORMATION_EXECUTION table
@@ -505,7 +505,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class ScenarioPerformanceMeasurementExecution {
 
-		private static final String TAG = "ScenarioPerformanceMeasurementExecution";
+		public static final String TAG = "ScenarioPerformanceMeasurementExecution";
 
 		/**
 		 * the fields in the SCENARIO_PERFORMANCE_MEASUREMENT_EXECUTION table
@@ -563,7 +563,7 @@ public abstract class DBR extends DB {
 	 */
 	public static class TestCaseVerdict {
 
-		private static final String TAG = "TestCaseVerdict";
+		public static final String TAG = "TestCaseVerdict";
 
 		/**
 		 * the fields in the TESTCASE_VERDICT table
