@@ -63,7 +63,7 @@ public class PGRtest {
 		
 		List<Item> results = pgr.query();
 		for(Item result : results) {
-			egsccResults.put(result.getName(), result);
+			egsccResults.put(result.getTag(), result);
 		}
 				
 		assertTrue(egsccResults.containsKey("information"));

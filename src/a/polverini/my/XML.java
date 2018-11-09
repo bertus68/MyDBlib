@@ -6,14 +6,11 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
-import org.h2.jdbc.JdbcClob;
 
 import a.polverini.my.DBS.AdditionalInformation;
 import a.polverini.my.DBS.Baseline;

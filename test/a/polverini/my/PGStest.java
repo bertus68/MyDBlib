@@ -22,6 +22,7 @@ import a.polverini.my.exceptions.AlreadyConnectedException;
 import a.polverini.my.exceptions.NotConnectedException;
 
 /**
+ * Test the PGS class
  * @author A.Polverini
  */
 public class PGStest {
@@ -63,16 +64,25 @@ public class PGStest {
 		
 		List<Item> results = pgs.query();
 		for(Item result : results) {
-			egsccSpecification.put(result.getName(), result);
+			egsccSpecification.put(result.getTag(), result);
 		}
 				
-		assertTrue(egsccSpecification.containsKey("information"));
-		assertTrue(egsccSpecification.containsKey("baselines"));
-		assertTrue(egsccSpecification.containsKey("deployments"));
-		assertTrue(egsccSpecification.containsKey("locks"));
-		assertTrue(egsccSpecification.containsKey("requirements"));
-		assertTrue(egsccSpecification.containsKey("projects"));
+		assertTrue(egsccSpecification.containsKey("baselines"	 ));
+		assertTrue(egsccSpecification.containsKey("information"	 ));
+		assertTrue(egsccSpecification.containsKey("deployments"	 ));
+		assertTrue(egsccSpecification.containsKey("locks"		 ));
+		assertTrue(egsccSpecification.containsKey("requirements" ));
+		assertTrue(egsccSpecification.containsKey("projects"	 ));
+		
+		try {
+			XML.Writer writer = new XML.Writer("c:/tmp/pgs.xml");
+			writer.writeSpecification(egsccSpecification);
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
+	
 
 }
