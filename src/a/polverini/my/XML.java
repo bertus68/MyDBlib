@@ -1,7 +1,5 @@
 package a.polverini.my;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,6 +23,7 @@ import a.polverini.my.DBS.Procedure;
 import a.polverini.my.DBS.ProcedureTestCase;
 import a.polverini.my.DBS.Project;
 import a.polverini.my.DBS.ProjectRequirement;
+import a.polverini.my.DBS.ProjectRequirementDeployment;
 import a.polverini.my.DBS.Requirement;
 import a.polverini.my.DBS.Scenario;
 import a.polverini.my.DBS.TestArea;
@@ -326,7 +325,7 @@ public class XML {
 				String importfile = (String) requirement.get(Requirement.Field.IMPORT_FILE);
 				if(importfile!=null) sb.append(String.format(" %s='%s'","importfile", importfile));
 				
-				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(), sb.toString());
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
 
 				String description = (String) requirement.get(Requirement.Field.DESCRIPTION);
 				if(description!=null) writeTag(indent+"  ", "description", description);
@@ -382,9 +381,8 @@ public class XML {
 				
 				String targetfolder = (String) item.get(Project.Field.TARGETFOLDER);
 				if(targetfolder!=null) sb.append(String.format(" %s='%s'","targetfolder", targetfolder));
-
 				
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
 				writeProjectRequirement(entry.getValue());
 				writeTestArea(entry.getValue());
 				writeScenario(entry.getValue());
@@ -398,8 +396,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[2];
-			String tags = "projectRequirements";
-			String tag  = "projectRequirement";
+			String tag  = "ProjectRequirement";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -415,18 +413,78 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+				
+				Item item = entry.getValue();
+
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) item.get(ProjectRequirement.Field.REQUIREMENT_ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String status = (String) item.get(ProjectRequirement.Field.STATUS);
+				if(status!=null) sb.append(String.format(" %s='%s'","status", status));
+				
+				String rfw = (String) item.get(ProjectRequirement.Field.RFW);
+				if(rfw!=null) sb.append(String.format(" %s='%s'","rfw", rfw));
+				
+				String verificationstage = (String) item.get(ProjectRequirement.Field.VERIFICATIONSTAGE);
+				if(verificationstage!=null) sb.append(String.format(" %s='%s'","verificationstage", verificationstage));
+				
+				String comment = (String) item.get(ProjectRequirement.Field.COMMENT);
+				if(comment!=null) sb.append(String.format(" %s='%s'","comment", comment));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+				
+				writeProjectRequirementDeployments(item);
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
 
+		private void writeProjectRequirementDeployments(Item parent) {
+			if(parent==null) return;
+			
+			String indent = INDENT[3];
+			String tag  = "ProjectRequirementDeployment";
+			String tags = tag + "s";
+			
+			// filter
+			Map<String, Item> unsorted = new HashMap<String, Item>();
+			for(Item child : parent.getChildren()) {
+				if(child instanceof ProjectRequirementDeployment) {
+					unsorted.put(child.toString(), child);
+				}
+			}
+			
+			// sort
+			Map<String, Item> sorted = new TreeMap<String, Item>(unsorted);
+			
+			// print
+			out.printf("%s<%s>\n",indent,tags);
+			for(Entry<String, Item> entry : sorted.entrySet()) {
+				
+				Item item = entry.getValue();
+
+				StringBuilder sb = new StringBuilder();
+				
+				Deployment deployment = (Deployment) item.get(Deployment.TAG);
+				if(deployment!=null) sb.append(String.format(" %s='%s'","deployment", deployment.get(Deployment.Field.NAME)));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+				out.printf("%s  </%s>\n",indent,tag);
+	        }
+			out.printf("%s</%s>\n",indent,tags);
+			
+			
+		}
+		
 		private void writeTestArea(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[2];
-			String tags = "testareas";
-			String tag  = "testarea";
+			String tag  = "TestArea";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -442,8 +500,27 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+
+				Item item = entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) item.get(TestArea.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String title = (String) item.get(TestArea.Field.TITLE);
+				if(title!=null) sb.append(String.format(" %s='%s'","title", title));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+
+				String description = (String) item.get(TestArea.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+
+				String approach = (String) item.get(TestArea.Field.APPROACH);
+				if(approach!=null) writeTag(indent+"  ", "approach", approach);
+
 				writeFeature(entry.getValue());
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
@@ -453,8 +530,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[3];
-			String tags = "features";
-			String tag  = "feature";
+			String tag  = "Feature";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -470,14 +547,30 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
-				writeTestCase(entry.getValue());
+				
+				Item item = entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) item.get(Feature.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String title = (String) item.get(Feature.Field.TITLE);
+				if(title!=null) sb.append(String.format(" %s='%s'","title", title));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+
+				String description = (String) item.get(Feature.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
+				writeTestCases(entry.getValue());
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
 
-		private void writeTestCase(Item parent) {
+		private void writeTestCases(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[4];
@@ -498,18 +591,42 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
-				writeTestCaseProjectRequirement(entry.getValue());
+				
+				Item item = entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String id = (String) item.get(TestCase.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String title = (String) item.get(TestCase.Field.TITLE);
+				if(title!=null) sb.append(String.format(" %s='%s'","title", title));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+
+				String specification = (String) item.get(TestCase.Field.SPECIFICATION);
+				if(specification!=null) writeTag(indent+"  ", "specification", specification);
+				
+				String scope = (String) item.get(TestCase.Field.SCOPE);
+				if(scope!=null) writeTag(indent+"  ", "scope", scope);
+				
+				String criteria = (String) item.get(TestCase.Field.CRITERIA);
+				if(criteria!=null) writeTag(indent+"  ", "criteria", criteria);
+				
+				String comment = (String) item.get(TestCase.Field.COMMENT);
+				if(comment!=null) writeTag(indent+"  ", "commetn", comment);
+				
+				writeTestCaseProjectRequirements(entry.getValue());
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
 		}
 
-		private void writeTestCaseProjectRequirement(Item parent) {
+		private void writeTestCaseProjectRequirements(Item parent) {
 			if(parent==null) return;
 			
 			String indent = INDENT[5];
-			String tag  = "testCaseProjectRequirement";
+			String tag  = "TestCaseProjectRequirement";
 			String tags = tag + "s";
 			
 			// filter
@@ -538,8 +655,8 @@ public class XML {
 			if(parent==null) return;
 			
 			String indent = INDENT[2];
-			String tags = "scenarios";
-			String tag  = "scenario";
+			String tag  = "Scenario";
+			String tags = tag + "s";
 			
 			// filter
 			Map<String, Item> unsorted = new HashMap<String, Item>();
@@ -555,9 +672,32 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+				
+				Item item = entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String type = (String) item.get(Scenario.Field.TYPE);
+				if(type!=null) sb.append(String.format(" %s='%s'","type", type));
+				
+				String id = (String) item.get(Scenario.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String title = (String) item.get(Scenario.Field.TITLE);
+				if(title!=null) sb.append(String.format(" %s='%s'","title", title));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+				
+				String description = (String) item.get(Scenario.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
+				String resources = (String) item.get(Scenario.Field.RESOURCES);
+				if(resources!=null) writeTag(indent+"  ", "resources", resources);
+				
 				writeScenarioTestArea(entry.getValue());
+				
 				writeProcedure(entry.getValue());
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
@@ -596,8 +736,27 @@ public class XML {
 			// print
 			out.printf("%s<%s>\n",indent,tags);
 			for(Entry<String, Item> entry : sorted.entrySet()) {
-				out.printf("%s  <%s pk='%s'>\n",indent,tag,entry.getKey());
+
+				Item item = entry.getValue();
+				
+				StringBuilder sb = new StringBuilder();
+				
+				String type = (String) item.get(Procedure.Field.TYPE);
+				if(type!=null) sb.append(String.format(" %s='%s'","type", type));
+				
+				String id = (String) item.get(Procedure.Field.ID);
+				if(id!=null) sb.append(String.format(" %s='%s'","id", id));
+				
+				String title = (String) item.get(Procedure.Field.TITLE);
+				if(title!=null) sb.append(String.format(" %s='%s'","title", title));
+				
+				out.printf("%s  <%s pk='%s'%s>\n",indent,tag,entry.getKey(),sb.toString());
+
+				String description = (String) item.get(Procedure.Field.DESCRIPTION);
+				if(description!=null) writeTag(indent+"  ", "description", description);
+				
 				writeProcedureTestCase(entry.getValue());
+				
 				out.printf("%s  </%s>\n",indent,tag);
 	        }
 			out.printf("%s</%s>\n",indent,tags);
