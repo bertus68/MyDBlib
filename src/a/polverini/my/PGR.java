@@ -9,14 +9,26 @@ import a.polverini.my.exceptions.NotConnectedException;
 
 public class PGR extends DBR {
 
-	private final String 	host;
-	private final int 		port;
+	static {
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			System.err.println("PGR "+e.getClass().getSimpleName()+" "+e.getMessage());
+		}
+	}
 
 	/**
 	 * @return the URL string for this database
 	 */
-	public String getURL() {
-		return String.format("jdbc:postgresql://%s:%d/%s", host, port, getName());
+	public static String URL(String path, String host, int port) {
+		return String.format("jdbc:postgresql://%s:%d/%s", host, port, path);
+	}
+	
+	/**
+	 * @return the URL string for this database
+	 */
+	public static String URL(String path) {
+		return String.format("jdbc:postgresql://%s:%d/%s", "localhost", 5432, path);
 	}
 	
 	/**
@@ -25,7 +37,7 @@ public class PGR extends DBR {
 	 * @throws NotConnectedException
 	 * @throws SQLException
 	 */
-	public List<Item> query() throws NotConnectedException, SQLException {
+	public List<Item> query() throws SQLException {
 		
 		// AdditionalInformationExecution
 		AdditionalInformationExecution.query(this);
@@ -52,21 +64,19 @@ public class PGR extends DBR {
 	 * @param pswd the user password
 	 * @param host the host name
 	 * @param port the port number
+	 * @throws SQLException 
 	 * @throws ClassNotFoundException
 	 */
-	public PGR(String name, String user, String pswd, String host, int port) throws ClassNotFoundException {
+	public PGR(String name, String user, String pswd) throws SQLException {
 		super(name, user, pswd);
-		this.host = host;
-		this.port = port;
-		Class.forName("org.postgresql.Driver");
 	}
 
 	/**
 	 * @param name the database name
 	 * @throws ClassNotFoundException
 	 */
-	public PGR(String name) throws ClassNotFoundException {
-		this(name, "postgres", "postgres", "localhost", 5432);
+	public PGR(String name) throws SQLException {
+		this(name, "postgres", "postgres");
 	}
 	
 	/**
@@ -94,10 +104,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 		
@@ -124,10 +133,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -153,10 +161,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -195,10 +202,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -229,10 +235,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -279,10 +284,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -329,10 +333,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -361,10 +364,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -393,10 +395,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -431,10 +432,9 @@ public class PGR extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGR pgr) throws NotConnectedException, SQLException {
+		public static void query(PGR pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 

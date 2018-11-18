@@ -6,23 +6,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import a.polverini.my.exceptions.NotConnectedException;
+import a.polverini.my.PGS.AdditionalInformation;
+import a.polverini.my.PGS.AutomatedProcedure;
+import a.polverini.my.PGS.AuxiliaryRoutine;
+import a.polverini.my.PGS.Baseline;
+import a.polverini.my.PGS.BaselineItem;
+import a.polverini.my.PGS.Deployment;
+import a.polverini.my.PGS.EditingLock;
+import a.polverini.my.PGS.Feature;
+import a.polverini.my.PGS.ManualProcedure;
+import a.polverini.my.PGS.ManualProcedureStep;
+import a.polverini.my.PGS.PerformanceMeasurement;
+import a.polverini.my.PGS.Procedure;
+import a.polverini.my.PGS.Project;
+import a.polverini.my.PGS.ProjectRequirement;
+import a.polverini.my.PGS.Requirement;
+import a.polverini.my.PGS.Scenario;
+import a.polverini.my.PGS.SoftwareRequirement;
+import a.polverini.my.PGS.TestArea;
+import a.polverini.my.PGS.TestCase;
+import a.polverini.my.PGS.UserRequirement;
 
 public abstract class DBS extends DB {
 
 	private static final boolean DEBUG = false;
 	
-	/** {@inheritDoc} */
-	abstract public String getURL();
-
 	/**
 	 * retrieve the data from the specification database
 	 * @return the list of items
-	 * @throws NotConnectedException
 	 * @throws SQLException
 	 */
-	abstract public List<Item> query() throws NotConnectedException, SQLException;
+	abstract public List<Item> query() throws SQLException;
+	
+	abstract public void truncate() throws SQLException;
 
+	abstract public void delete() throws SQLException;
+	
 	/**
 	 * the tables in the SPECIFICATION database
 	 */
@@ -57,6 +76,85 @@ public abstract class DBS extends DB {
 		USER_REQUIREMENT
 	}
 	
+	/**
+	 * @param table
+	 * @return the table name
+	 */
+	public abstract String getTable(Table table);
+	
+	/**
+	 * @param table
+	 * @return the table keys
+	 */
+	public abstract Map<Object, String> getKeys(Table additionalInformation);
+	
+	/**
+	 * @param table
+	 * @return the table primary key
+	 */
+	public Object getPrimaryKey(Table table) {
+		switch(table) {
+		case ADDITIONAL_INFORMATION:
+			return AdditionalInformation.Field.PK;
+		case AUTOMATED_PROCEDURE:
+			return AutomatedProcedure.Field.PK;
+		case AUXILIARY_ROUTINE:
+			return AuxiliaryRoutine.Field.PK;
+		case BASELINE:
+			return Baseline.Field.PK;
+		case BASELINE_ITEM:
+			return BaselineItem.Field.PK;
+		case DEPLOYMENT:
+			return Deployment.Field.PK;
+		case EDITING_LOCK:
+			return EditingLock.Field.PK;
+		case FEATURE:
+			return Feature.Field.PK;
+		case MANUAL_PROCEDURE:
+			return ManualProcedure.Field.PK;
+		case MANUAL_PROCEDURE_STEP:
+			return ManualProcedureStep.Field.PK;
+		case PERFORMANCE_MEASUREMENT:
+			return PerformanceMeasurement.Field.PK;
+		case PROCEDURE:
+			return Procedure.Field.PK;
+		case PROCEDURE_TESTCASE:
+			return null;
+		case PROJECT:
+			return Project.Field.PK;
+		case PROJECT_REQUIREMENT:
+			return ProjectRequirement.Field.PK;
+		case PROJECT_REQUIREMENT_DEPLOYMENT:
+			return null;
+		case REQUIREMENT:
+			return Requirement.Field.ID;
+		case REQUIREMENT_DEPLOYMENT:
+			return null;
+		case SCENARIO:
+			return Scenario.Field.PK;
+		case SCENARIO_ADDITIONAL_INFORMATION:
+			return null;
+		case SCENARIO_DEPLOYMENT:
+			return null;
+		case SCENARIO_PERFORMANCE_MEASUREMENT:
+			return null;
+		case SOFTWARE_REQUIREMENT:
+			return SoftwareRequirement.Field.ID;
+		case SOFTWARE_REQUIREMENT_USER_REQUIREMENT:
+			return null;
+		case TESTAREA:
+			return TestArea.Field.PK;
+		case TESTCASE:
+			return TestCase.Field.PK;
+		case TESTCASE_PROJECT_REQUIREMENT:
+			return null;
+		case USER_REQUIREMENT:
+			return UserRequirement.Field.ID;
+		default:
+			return null;
+		}
+	}
+	
 	Item root = new Item();
 	
 	Item additionalInformationRoot = new Item(root, "information");
@@ -86,12 +184,13 @@ public abstract class DBS extends DB {
 
 	/**
 	 * constructor
-	 * @param name the database name
+	 * @param url the database URL
 	 * @param user the database user
 	 * @param pswd the database password
+	 * @throws SQLException 
 	 */
-	public DBS(String name, String user, String pswd) {
-		super(name, user, pswd);
+	public DBS(String url, String user, String pswd) throws SQLException {
+		super(url, user, pswd);
 	}
 
 	/**
@@ -110,6 +209,9 @@ public abstract class DBS extends DB {
 			DESCRIPTION
 		}
 
+		/**
+		 * @param parent
+		 */
 		public AdditionalInformation(Item parent) {
 			super(parent, TAG);
 		}
@@ -124,10 +226,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				AdditionalInformation additionalInformation = new AdditionalInformation(dbs.additionalInformationRoot);
@@ -143,6 +244,20 @@ public abstract class DBS extends DB {
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
 
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.KEY, Field.DESCRIPTION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
+	    
 	}
 
 	/**
@@ -167,10 +282,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -211,10 +325,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -263,10 +376,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				Baseline baseline = new Baseline(dbs.baselineRoot);
@@ -281,6 +393,21 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.NAME, Field.DESCRIPTION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
+	    
 	}
 
 	/**
@@ -314,10 +441,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -339,6 +465,21 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.VERSION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	    	if(!this.parent.toString().equals(other.parent.toString()));
+	        return true;
+	    }
 
 	}
 
@@ -373,10 +514,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				Deployment deployment = new Deployment(dbs.deploymentRoot);
@@ -391,6 +531,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.NAME, Field.DESCRIPTION, Field.MEASUREMENT_ONLY}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 
 	}
 
@@ -425,10 +579,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				EditingLock lock = new EditingLock(dbs.lockRoot);
@@ -443,6 +596,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.OWNER, Field.TYPE}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 
 	}
 
@@ -478,10 +645,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -504,6 +670,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.TITLE, Field.DESCRIPTION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -529,10 +709,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -584,10 +763,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -611,6 +789,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.STEP_NUMBER, Field.ACTION, Field.EXPECTED_RESULTS, Field.COMMENTS}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -647,10 +839,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -674,6 +865,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.KEY, Field.DESCRIPTION, Field.BASEVALUE, Field.TARGETVALUE}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 
 	}
 
@@ -710,10 +915,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -736,6 +940,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.TYPE, Field.ID, Field.TITLE, Field.DESCRIPTION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -744,7 +962,7 @@ public abstract class DBS extends DB {
 	 */
 	public static class ProcedureTestCase extends Item {
 
-		private static final String TAG = "ProcedureTestCase";
+		public static final String TAG = "ProcedureTestCase";
 
 		/**
 		 * the fields in the PROCEDURE_TESTCASE table
@@ -768,10 +986,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -835,10 +1052,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				Project project = new Project(dbs.projectRoot);
@@ -853,6 +1069,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.TYPE, Field.ID, Field.VERSION, Field.ARTIFACT, Field.PACKAGE, Field.BASEFOLDER, Field.TARGETFOLDER}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 
 	}
 
@@ -890,10 +1120,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				
@@ -928,6 +1157,20 @@ public abstract class DBS extends DB {
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
 
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.REQUIREMENT_ID, Field.STATUS, Field.RFW, Field.VERIFICATIONSTAGE, Field.COMMENT}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
+
 	}
 
 	/**
@@ -959,17 +1202,16 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
-				Object requirement_pk = result.get(Field.REQUIREMENT_PK);
-				Item requirement = dbs.projectRequirementPK.get(requirement_pk);
-				if(requirement==null) {
-					System.err.println(ProjectRequirement.TAG+" (pk="+requirement_pk+")");
+				Object projectRequirement_pk = result.get(Field.REQUIREMENT_PK);
+				Item projectRequirement = dbs.projectRequirementPK.get(projectRequirement_pk);
+				if(projectRequirement==null) {
+					System.err.println(ProjectRequirement.TAG+" (pk="+projectRequirement_pk+")");
 					continue;
 				}
 
@@ -980,7 +1222,7 @@ public abstract class DBS extends DB {
 					continue;
 				}
 
-				ProjectRequirementDeployment reference = new ProjectRequirementDeployment(requirement);
+				ProjectRequirementDeployment reference = new ProjectRequirementDeployment(projectRequirement);
 				reference.set(Deployment.TAG, deployment);
 
 				if(DEBUG) System.out.println(TAG+" "+reference);
@@ -1026,10 +1268,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				Requirement requirement = new Requirement(dbs.requirementRoot);
@@ -1044,6 +1285,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.TYPE, Field.ID, Field.NAME, Field.DESCRIPTION, Field.IMPORT_DATE, Field.IMPORT_FILE, Field.PRIORITY, Field.VERIFICATION, Field.VERSION}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 
 	}
 
@@ -1076,10 +1331,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1142,10 +1396,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1178,6 +1431,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.TYPE, Field.ID, Field.TITLE, Field.DESCRIPTION, Field.RESOURCES}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -1210,10 +1477,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1270,10 +1536,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1330,10 +1595,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1392,10 +1656,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				
@@ -1418,6 +1681,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.COMMENT, Field.STABILITY, Field.STRUCTURE}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -1450,10 +1727,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1526,10 +1802,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1553,6 +1828,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.TITLE, Field.DESCRIPTION, Field.APPROACH}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 	
 	}
 
@@ -1592,10 +1881,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1618,6 +1906,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.TITLE, Field.SPECIFICATION, Field.SCOPE, Field.CRITERIA, Field.COMMENT}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 
@@ -1650,10 +1952,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 
@@ -1715,10 +2016,9 @@ public abstract class DBS extends DB {
 		 * @param dbs the specification database 
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBS dbs, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBS dbs, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbs.query(table, keys);
 			for(Properties result : results) {
 				
@@ -1741,6 +2041,20 @@ public abstract class DBS extends DB {
 			}
 			if(DEBUG) System.out.println(TAG+" "+dbs.count(table));
 		}
+
+		/**
+		 * @param other object to compare to
+		 * @return true if this object is equal to the other one
+		 */
+	    public boolean equals(AdditionalInformation other) {
+	    	for(Object key : new Object[] {Field.ID, Field.NOTE, Field.JUSTIFICATION, Field.LAST_CHANGED, Field.LEVEL, Field.TYPE}) {
+	    		Object a = this.get(key);
+	    		Object b = other.get(key);
+	    		if(a==null && b==null) continue;
+				if(!a.equals(b)) return false;
+	    	}
+	        return true;
+	    }
 		
 	}
 

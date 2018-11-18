@@ -42,23 +42,54 @@ public class Item {
 	}
 
 	private Properties properties = new Properties();
+	
+	/**
+	 * @return the item properties
+	 */
+	public Properties getProperties() {
+		return properties;
+	}
 
+	/**
+	 * @param key
+	 * @return the corresponding property
+	 */
 	public Object get(Object key) {
 		return properties.get(key);
 	}
 
+	/**
+	 * @param key
+	 * @param val
+	 */
 	public void set(Object key, Object val) {
 		properties.put(key, val);
 	}
 	
+	/**
+	 * the children list
+	 */
 	private List<Item> children = new ArrayList<>();
 
+	/**
+	 * @return true if the item has children
+	 */
+	public boolean hasChildren() {
+		return !children.isEmpty();
+	}
+	
+	/**
+	 * @return the item children
+	 */
 	public List<Item> getChildren() {
 		return this.children;
 	}
-	
+
+	/**
+	 * @param child
+	 */
 	public void add(Item child) {
 		children.add(child);
 	}
-	
+
 }

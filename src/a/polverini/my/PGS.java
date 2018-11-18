@@ -5,27 +5,240 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import a.polverini.my.DBS.Table;
 import a.polverini.my.exceptions.NotConnectedException;
 
 public class PGS extends DBS {
 
-	private final String 	host;
-	private final int 		port;
+	static {
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			System.err.println("PGR "+e.getClass().getSimpleName()+" "+e.getMessage());
+		}
+	}
 
 	/**
 	 * @return the URL string for this database
 	 */
-	public String getURL() {
-		return String.format("jdbc:postgresql://%s:%d/%s", host, port, getName());
+	public static String URL(String path, String host, int port) {
+		return String.format("jdbc:postgresql://%s:%d/%s", host, port, path);
 	}
 
+	/**
+	 * @return the URL string for this database
+	 */
+	public static String URL(String path) {
+		return URL(path, "localhost", 5432);
+	}
+
+	/** {@inheritDoc} */
+	public String getTable(Table table) {
+		switch(table) {
+		case ADDITIONAL_INFORMATION:
+			return AdditionalInformation.TABLE;
+		case AUTOMATED_PROCEDURE:
+			return AutomatedProcedure.TABLE;
+		case AUXILIARY_ROUTINE:
+			return AuxiliaryRoutine.TABLE;
+		case BASELINE:
+			return Baseline.TABLE;
+		case BASELINE_ITEM:
+			return BaselineItem.TABLE;
+		case DEPLOYMENT:
+			return Deployment.TABLE;
+		case EDITING_LOCK:
+			return EditingLock.TABLE;
+		case FEATURE:
+			return Feature.TABLE;
+		case MANUAL_PROCEDURE:
+			return ManualProcedure.TABLE;
+		case MANUAL_PROCEDURE_STEP:
+			return ManualProcedureStep.TABLE;
+		case PERFORMANCE_MEASUREMENT:
+			return PerformanceMeasurement.TABLE;
+		case PROCEDURE:
+			return Procedure.TABLE;
+		case PROCEDURE_TESTCASE:
+			return ProcedureTestCase.TABLE;
+		case PROJECT:
+			return Project.TABLE;
+		case PROJECT_REQUIREMENT:
+			return ProjectRequirement.TABLE;
+		case PROJECT_REQUIREMENT_DEPLOYMENT:
+			return ProjectRequirementDeployment.TABLE;
+		case REQUIREMENT:
+			return Requirement.TABLE;
+		case REQUIREMENT_DEPLOYMENT:
+			return RequirementDeployment.TABLE;
+		case SCENARIO:
+			return Scenario.TABLE;
+		case SCENARIO_ADDITIONAL_INFORMATION:
+			return ScenarioAdditionalInformation.TABLE;
+		case SCENARIO_DEPLOYMENT:
+			return ScenarioDeployment.TABLE;
+		case SCENARIO_PERFORMANCE_MEASUREMENT:
+			return ScenarioPerformanceMeasurement.TABLE;
+		case SOFTWARE_REQUIREMENT:
+			return SoftwareRequirement.TABLE;
+		case SOFTWARE_REQUIREMENT_USER_REQUIREMENT:
+			return SoftwareRequirementUserRequirement.TABLE;
+		case TESTAREA:
+			return TestArea.TABLE;
+		case TESTCASE:
+			return TestCase.TABLE;
+		case TESTCASE_PROJECT_REQUIREMENT:
+			return TestCaseProjectRequirement.TABLE;
+		case USER_REQUIREMENT:
+			return UserRequirement.TABLE;
+		default:
+			return null;
+		}
+	}
+	
+	/** {@inheritDoc} */
+	public Map<Object, String> getKeys(Table table) {
+		switch(table) {
+		case ADDITIONAL_INFORMATION:
+			return AdditionalInformation.KEYS;
+		case AUTOMATED_PROCEDURE:
+			return AutomatedProcedure.KEYS;
+		case AUXILIARY_ROUTINE:
+			return AuxiliaryRoutine.KEYS;
+		case BASELINE:
+			return Baseline.KEYS;
+		case BASELINE_ITEM:
+			return BaselineItem.KEYS;
+		case DEPLOYMENT:
+			return Deployment.KEYS;
+		case EDITING_LOCK:
+			return EditingLock.KEYS;
+		case FEATURE:
+			return Feature.KEYS;
+		case MANUAL_PROCEDURE:
+			return ManualProcedure.KEYS;
+		case MANUAL_PROCEDURE_STEP:
+			return ManualProcedureStep.KEYS;
+		case PERFORMANCE_MEASUREMENT:
+			return PerformanceMeasurement.KEYS;
+		case PROCEDURE:
+			return Procedure.KEYS;
+		case PROCEDURE_TESTCASE:
+			return ProcedureTestCase.KEYS;
+		case PROJECT:
+			return Project.KEYS;
+		case PROJECT_REQUIREMENT:
+			return ProjectRequirement.KEYS;
+		case PROJECT_REQUIREMENT_DEPLOYMENT:
+			return ProjectRequirementDeployment.KEYS;
+		case REQUIREMENT:
+			return Requirement.KEYS;
+		case REQUIREMENT_DEPLOYMENT:
+			return RequirementDeployment.KEYS;
+		case SCENARIO:
+			return Scenario.KEYS;
+		case SCENARIO_ADDITIONAL_INFORMATION:
+			return ScenarioAdditionalInformation.KEYS;
+		case SCENARIO_DEPLOYMENT:
+			return ScenarioDeployment.KEYS;
+		case SCENARIO_PERFORMANCE_MEASUREMENT:
+			return ScenarioPerformanceMeasurement.KEYS;
+		case SOFTWARE_REQUIREMENT:
+			return SoftwareRequirement.KEYS;
+		case SOFTWARE_REQUIREMENT_USER_REQUIREMENT:
+			return SoftwareRequirementUserRequirement.KEYS;
+		case TESTAREA:
+			return TestArea.KEYS;
+		case TESTCASE:
+			return TestCase.KEYS;
+		case TESTCASE_PROJECT_REQUIREMENT:
+			return TestCaseProjectRequirement.KEYS;
+		case USER_REQUIREMENT:
+			return UserRequirement.KEYS;
+		default:
+			return null;
+		}
+	}
+
+	public void truncate() throws SQLException {
+		String[] SPECIFICATION_TABLES = new String[] {
+				AdditionalInformation.TABLE, 
+				Baseline.TABLE, 
+				BaselineItem.TABLE, 
+				Deployment.TABLE, 
+				EditingLock.TABLE, 
+				Requirement.TABLE, 
+				RequirementDeployment.TABLE, 
+				UserRequirement.TABLE, 
+				SoftwareRequirement.TABLE, 
+				SoftwareRequirementUserRequirement.TABLE, 
+				Project.TABLE, 
+				ProjectRequirement.TABLE, 
+				ProjectRequirementDeployment.TABLE, 
+				PerformanceMeasurement.TABLE, 
+				TestArea.TABLE, 
+				Feature.TABLE, 
+				TestCase.TABLE, 
+				TestCaseProjectRequirement.TABLE, 
+				Scenario.TABLE, 
+				ScenarioAdditionalInformation.TABLE, 
+				ScenarioDeployment.TABLE, 
+				ScenarioPerformanceMeasurement.TABLE, 
+				Procedure.TABLE, 
+				ProcedureTestCase.TABLE, 
+				AutomatedProcedure.TABLE, 
+				ManualProcedure.TABLE, 
+				ManualProcedureStep.TABLE, 
+				AuxiliaryRoutine.TABLE, 
+		};
+		for(String table : SPECIFICATION_TABLES) {
+			truncate(table);
+		}
+	}
+	
+	public void delete() throws SQLException {
+		String[] SPECIFICATION_TABLES = new String[] {
+				ProcedureTestCase.TABLE, 
+				ManualProcedureStep.TABLE, 
+				ManualProcedure.TABLE, 
+				AutomatedProcedure.TABLE, 
+				AuxiliaryRoutine.TABLE, 
+				Procedure.TABLE, 
+				ScenarioAdditionalInformation.TABLE, 
+				ScenarioPerformanceMeasurement.TABLE, 
+				ScenarioDeployment.TABLE, 
+				Scenario.TABLE, 
+				TestCaseProjectRequirement.TABLE, 
+				TestCase.TABLE, 
+				Feature.TABLE, 
+				TestArea.TABLE, 
+				PerformanceMeasurement.TABLE, 
+				ProjectRequirementDeployment.TABLE, 
+				ProjectRequirement.TABLE, 
+				Project.TABLE, 
+				AdditionalInformation.TABLE, 
+				SoftwareRequirementUserRequirement.TABLE, 
+				SoftwareRequirement.TABLE, 
+				UserRequirement.TABLE, 
+				RequirementDeployment.TABLE, 
+				Requirement.TABLE, 
+				BaselineItem.TABLE, 
+				Baseline.TABLE, 
+				Deployment.TABLE, 
+				EditingLock.TABLE, 
+		};
+		for(String table : SPECIFICATION_TABLES) {
+			delete(table);
+		}
+	}
+	
 	/**
 	 * retrieve the data from the specification database
 	 * @return a list of items
 	 * @throws NotConnectedException
 	 * @throws SQLException
 	 */
-	public List<Item> query() throws NotConnectedException, SQLException {
+	public List<Item> query() throws SQLException {
 		
 		// AdditionalInformation
 		AdditionalInformation.query(this);
@@ -75,26 +288,21 @@ public class PGS extends DBS {
 	}
 
 	/**
-	 * @param name the database name
+	 * @param url the database name
 	 * @param user the user name
 	 * @param pswd the user password
-	 * @param host the host name
-	 * @param port the port number
-	 * @throws ClassNotFoundException
+	 * @throws SQLException 
 	 */
-	public PGS(String name, String user, String pswd, String host, int port) throws ClassNotFoundException {
-		super(name, user, pswd);
-		this.host = host;
-		this.port = port;
-		Class.forName("org.postgresql.Driver");
+	public PGS(String url, String user, String pswd) throws SQLException {
+		super(url, user, pswd);
 	}
 
 	/**
 	 * @param name the database name
-	 * @throws ClassNotFoundException
+	 * @throws SQLException
 	 */
-	public PGS(String name) throws ClassNotFoundException {
-		this(name, "postgres", "postgres", "localhost", 5432);
+	public PGS(String url) throws SQLException {
+		this(url, "postgres", "postgres");
 	}
 
 	/**
@@ -122,10 +330,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -157,10 +364,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -192,10 +398,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -231,10 +436,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -272,10 +476,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -313,10 +516,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 
@@ -354,10 +556,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -397,10 +598,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -432,10 +632,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -477,10 +676,9 @@ public class PGS extends DBS {
 	
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -522,10 +720,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -567,10 +764,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -604,10 +800,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -654,10 +849,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -701,10 +895,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -738,10 +931,9 @@ public class PGS extends DBS {
 
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -789,10 +981,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -826,10 +1017,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -875,10 +1065,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -912,10 +1101,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -949,10 +1137,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -986,10 +1173,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1027,10 +1213,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1064,10 +1249,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1109,10 +1293,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1158,10 +1341,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1195,10 +1377,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		
@@ -1240,10 +1421,9 @@ public class PGS extends DBS {
 		
 		/**
 		 * @param pgs the PostgreSQL specification database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(PGS pgs) throws NotConnectedException, SQLException {
+		public static void query(PGS pgs) throws SQLException {
 			query(pgs, TABLE, KEYS);
 		}
 		

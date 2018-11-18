@@ -9,23 +9,22 @@ import a.polverini.my.exceptions.NotConnectedException;
 
 public class H2R extends DBR {
 
-	private final String 	host;
-	private final int 		port;
-
 	/**
+	 * @param path
+	 * @param host
+	 * @param port
 	 * @return the URL string for this database
 	 */
-	public String getURL() {
-		return String.format("jdbc:h2:tcp://%s:%s/c:/data/%s", host, port, getName());
+	public static String URL(String path, String host, int port) {
+		return String.format("jdbc:h2:tcp://%s:%d/%s", host, port, path);
 	}
 	
 	/**
 	 * retrieve the data from the results database
 	 * @return a list of items
-	 * @throws NotConnectedException
 	 * @throws SQLException
 	 */
-	public List<Item> query() throws NotConnectedException, SQLException {
+	public List<Item> query() throws SQLException {
 		
 		// AdditionalInformationExecution
 		AdditionalInformationExecution.query(this);
@@ -45,6 +44,13 @@ public class H2R extends DBR {
 		
 		return root.getChildren();
 	}
+	static {
+		try {
+			Class.forName("org.h2.Driver");
+		} catch (ClassNotFoundException e) {
+			System.err.println("H2R: "+e.getClass().getSimpleName()+" "+e.getMessage());
+		}
+	}
 	
 	/**
 	 * @param name the database name
@@ -53,20 +59,18 @@ public class H2R extends DBR {
 	 * @param host the host name
 	 * @param port the port number
 	 * @throws ClassNotFoundException
+	 * @throws SQLException 
 	 */
-	public H2R(String name, String user, String pswd, String host, int port) throws ClassNotFoundException {
-		super(name, user, pswd);
-		this.host = host;
-		this.port = port;
-		Class.forName("org.h2.Driver");
+	public H2R(String url, String user, String pswd) throws SQLException {
+		super(url, user, pswd);
 	}
 
 	/**
 	 * @param name the database name
-	 * @throws ClassNotFoundException
+	 * @throws SQLException 
 	 */
-	public H2R(String name) throws ClassNotFoundException {
-		this(name, "sa", "", "localhost", 9092);
+	public H2R(String name) throws SQLException {
+		this( URL(name, "localhost", 9092), "sa", "" );
 	}
 	
 	/**
@@ -97,7 +101,7 @@ public class H2R extends DBR {
 		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 		
@@ -127,7 +131,7 @@ public class H2R extends DBR {
 		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -156,7 +160,7 @@ public class H2R extends DBR {
 		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -195,10 +199,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -229,10 +232,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -279,10 +281,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -329,10 +330,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -361,10 +361,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -393,10 +392,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 
@@ -431,10 +429,9 @@ public class H2R extends DBR {
 
 		/**
 		 * @param pgr the PostgreSQL results database
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(H2R pgr) throws NotConnectedException, SQLException {
+		public static void query(H2R pgr) throws SQLException {
 			query(pgr, TABLE, KEYS);
 		}
 

@@ -12,16 +12,13 @@ public abstract class DBR extends DB {
 
 	private static final boolean DEBUG = false;
 	
-	/** {@inheritDoc} */
-	abstract public String getURL();
-
 	/**
 	 * retrieve the data from the specification database
 	 * @return a list of items
 	 * @throws NotConnectedException
 	 * @throws SQLException
 	 */
-	abstract public List<Item> query() throws NotConnectedException, SQLException;
+	abstract public List<Item> query() throws SQLException;
 	
 	/**
 	 * the tables in the RESULTS database
@@ -56,14 +53,15 @@ public abstract class DBR extends DB {
 
 	/**
 	 * constructor
-	 * @param name the database name
+	 * @param url the database URL
 	 * @param user the database user
 	 * @param pswd the database password
+	 * @throws SQLException 
 	 */
-	public DBR(String name, String user, String pswd) {
-		super(name, user, pswd);
+	public DBR(String url, String user, String pswd) throws SQLException {
+		super(url, user, pswd);
 	}
-
+	
 	/**
 	 * ADDITIONAL_INFORMATION_EXECUTION table
 	 */
@@ -92,10 +90,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 				Item item = new Item(dbr.additionalInformationExecutionRoot, TAG);
@@ -139,10 +136,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 
@@ -187,10 +183,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 
@@ -241,10 +236,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 				
@@ -299,10 +293,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 				Item item = new Item(dbr.performanceMeasurementExecutionRoot, TAG);
@@ -356,10 +349,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 
@@ -421,10 +413,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 				Item item = new Item(dbr.scenarioExecutionRoot, TAG);
@@ -469,10 +460,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 
@@ -527,10 +517,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 
@@ -588,10 +577,9 @@ public abstract class DBR extends DB {
 		 * @param dbr the results database
 		 * @param table the table name
 		 * @param keys the key/field mapping
-		 * @throws NotConnectedException
 		 * @throws SQLException
 		 */
-		public static void query(DBR dbr, String table, Map<Object, String> keys) throws NotConnectedException, SQLException {
+		public static void query(DBR dbr, String table, Map<Object, String> keys) throws SQLException {
 			List<Properties> results = dbr.query(table, keys);
 			for(Properties result : results) {
 				Item testcaseVerdict = new Item(dbr.testcaseVerdictRoot, TAG);
